@@ -55,9 +55,15 @@ class UserProvider extends ChangeNotifier {
     _showLoading();
 
     // as Queue process
-    _loadUserWithIsolateOne();
+    // _loadUserWithIsolateOne();
     // Parallel requests
-    // _loadUserWithIsolateTwo();
+    _loadUserWithIsolateTwo();
+  }
+
+  void _calculateConsumedTime() {
+    _endedTime = DateTime.now().millisecondsSinceEpoch;
+    var diffTime = (_endedTime - _startedTime) / 1000;
+    _consumedTime = '$diffTime seconds';
   }
 
   void _loadUserWithIsolateOne() {
@@ -68,20 +74,22 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  // Please be aware on this calls, because it makes high latency
   void _loadUserWithIsolateTwo() async {
     final results = await Parallel.map(
-        List.generate(
-          _maxCalls,
-          (i) => 'https://randomuser.me/api/?results=$_usersLengthPerCall&page=${i + 1}',
-        ),
-        fetchUser);
+      List.generate(
+        _maxCalls,
+        (i) =>
+            'https://randomuser.me/api/?results=$_usersLengthPerCall&page=${i + 1}',
+      ),
+      fetchUser,
+    );
+
     for (var result in results) {
       _users.addAll(result);
     }
 
-    _endedTime = DateTime.now().millisecondsSinceEpoch;
-    var diffTime = (_endedTime - _startedTime) / 1000;
-    _consumedTime = '$diffTime seconds';
+    _calculateConsumedTime();
     _hideLoading();
   }
 
@@ -91,17 +99,14 @@ class UserProvider extends ChangeNotifier {
     _showLoading();
 
     for (var i = 1; i <= _maxCalls; i++) {
-      var url = Uri.parse(
+      var users = await fetchUser(
         'https://randomuser.me/api/?results=$_usersLengthPerCall&page=$i',
       );
-      var response = await http.get(url);
 
-      _users.addAll(_mapToUsers(convert.jsonDecode(response.body)));
+      _users.addAll(users);
     }
 
-    _endedTime = DateTime.now().millisecondsSinceEpoch;
-    var diffTime = (_endedTime - _startedTime) / 1000;
-    _consumedTime = '$diffTime seconds';
+    _calculateConsumedTime();
     _hideLoading();
   }
 
@@ -110,7 +115,6 @@ class UserProvider extends ChangeNotifier {
   }
 
   // PARALLEL
-  // Please be aware on this calls, because it makes high latency
 
   static Future<List<User>> fetchUser(String url) async {
     var uri = Uri.parse(url);
@@ -126,9 +130,7 @@ class UserProvider extends ChangeNotifier {
       _users.addAll(data);
 
       if (_maxCalls <= _counterCalls) {
-        _endedTime = DateTime.now().millisecondsSinceEpoch;
-        var diffTime = (_endedTime - _startedTime) / 1000;
-        _consumedTime = '$diffTime seconds';
+        _calculateConsumedTime();
         _hideLoading();
       }
     }
@@ -159,7 +161,8 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      fullName: "${json['name']['title']}. ${json['name']['first']} ${json['name']['last']}",
+      fullName:
+          "${json['name']['title']}. ${json['name']['first']} ${json['name']['last']}",
       picture: json['picture']['large'],
       email: json['email'],
     );
