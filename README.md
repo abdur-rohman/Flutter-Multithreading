@@ -17,6 +17,4 @@ samples, guidance on mobile development, and a full API reference.
 
 ## Preivew
 
-<video width="320" height="240" controls>
-  <source src="video/flutter_multithreading.mp4" type="video/mp4">
-</video>
+https://user-images.githubusercontent.com/26162164/161373505-477afe01-58a5-451a-a5cd-5204db77b481.mp4
