@@ -32,8 +32,8 @@ class UserProvider extends ChangeNotifier {
 
   Future<void> init() async {
     await _worker.init(
-      mainMessageHandlelr,
-      isolateMessageHandler,
+      _mainMessageHandlelr,
+      _isolateMessageHandler,
       errorHandler: kDebugMode ? print : null,
       queueMode: true,
     );
@@ -55,9 +55,9 @@ class UserProvider extends ChangeNotifier {
     _showLoading();
 
     // as Queue process
-    // _loadUserWithIsolateOne();
+    _loadUserWithIsolateOne();
     // Parallel requests
-    _loadUserWithIsolateTwo();
+    // _loadUserWithIsolateTwo();
   }
 
   void _calculateConsumedTime() {
@@ -75,14 +75,14 @@ class UserProvider extends ChangeNotifier {
   }
 
   // Please be aware on this calls, because it makes high latency
-  void _loadUserWithIsolateTwo() async {
+  Future<void> _loadUserWithIsolateTwo() async {
     final results = await Parallel.map(
       List.generate(
         _maxCalls,
         (i) =>
             'https://randomuser.me/api/?results=$_usersLengthPerCall&page=${i + 1}',
       ),
-      fetchUser,
+      _fetchUser,
     );
 
     for (var result in results) {
@@ -99,7 +99,7 @@ class UserProvider extends ChangeNotifier {
     _showLoading();
 
     for (var i = 1; i <= _maxCalls; i++) {
-      var users = await fetchUser(
+      var users = await _fetchUser(
         'https://randomuser.me/api/?results=$_usersLengthPerCall&page=$i',
       );
 
@@ -116,7 +116,7 @@ class UserProvider extends ChangeNotifier {
 
   // PARALLEL
 
-  static Future<List<User>> fetchUser(String url) async {
+  static Future<List<User>> _fetchUser(String url) async {
     var uri = Uri.parse(url);
     var response = await http.get(uri);
     return _mapToUsers(convert.jsonDecode(response.body));
@@ -124,7 +124,7 @@ class UserProvider extends ChangeNotifier {
 
   // WORKER
 
-  void mainMessageHandlelr(dynamic data, SendPort isolateSendPort) {
+  void _mainMessageHandlelr(dynamic data, SendPort isolateSendPort) {
     if (data is List<User>) {
       _counterCalls++;
       _users.addAll(data);
@@ -136,7 +136,7 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  static void isolateMessageHandler(
+  static void _isolateMessageHandler(
     dynamic data,
     SendPort mainSendPort,
     SendErrorFunction sendError,
