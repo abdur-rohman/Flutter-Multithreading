@@ -4,13 +4,6 @@ import 'package:easy_isolate/easy_isolate.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-List<User> _mapToUsers(Map<String, dynamic> json) {
-  if (kDebugMode) print('JSON: $json');
-
-  var results = (json['results'] ?? []) as List<dynamic>;
-  return results.map((e) => User.fromJson(e)).toList();
-}
-
 class UserProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -147,6 +140,13 @@ class UserProvider extends ChangeNotifier {
       var users = _mapToUsers(result);
       mainSendPort.send(users);
     }
+  }
+
+  static List<User> _mapToUsers(Map<String, dynamic> json) {
+    if (kDebugMode) print('JSON: $json');
+
+    var results = (json['results'] ?? []) as List<dynamic>;
+    return results.map((e) => User.fromJson(e)).toList();
   }
 }
 
