@@ -48,9 +48,9 @@ class UserProvider extends ChangeNotifier {
     _showLoading();
 
     // as Queue process
-    _loadUserWithIsolateOne();
+    // _loadUserWithIsolateOne();
     // Parallel requests
-    // _loadUserWithIsolateTwo();
+    _loadUserWithIsolateTwo();
   }
 
   void _calculateConsumedTime() {

@@ -13,11 +13,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter Multithreading',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.blueGrey,
       ),
-      home: const UserPage(title: 'Flutter Demo Home Page'),
+      home: const UserPage(title: 'Flutter Multithreading with Isolate'),
     );
   }
 }
@@ -55,6 +55,7 @@ class _UserPageState extends State<UserPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(primary: Colors.green),
                   onPressed: () {
                     userProvider.loadUserWithIsolate();
                   },
@@ -62,6 +63,7 @@ class _UserPageState extends State<UserPage> {
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(primary: Colors.red),
                   onPressed: () {
                     userProvider.loadUserWithOutIsolate();
                   },
@@ -79,7 +81,9 @@ class _UserPageState extends State<UserPage> {
                         child: SizedBox(
                           width: 32,
                           height: 32,
-                          child: CircularProgressIndicator(),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
                         ),
                       )
                     : Column(
